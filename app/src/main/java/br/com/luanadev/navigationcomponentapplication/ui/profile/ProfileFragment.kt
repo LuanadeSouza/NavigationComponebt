@@ -13,7 +13,7 @@ import br.com.luanadev.navigationcomponentapplication.ui.login.LoginViewModel
 
 class ProfileFragment : Fragment() {
 
-    private val viewModel: LoginViewModel by activityViewModels()
+    private val loginViewModel: LoginViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -25,8 +25,7 @@ class ProfileFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val navController = findNavController()
-        viewModel.authenticationStateEvent.observe(viewLifecycleOwner, Observer { authenticationState ->
+        loginViewModel.authenticationStateEvent.observe(viewLifecycleOwner, Observer { authenticationState ->
             when (authenticationState) {
                 is LoginViewModel.AuthenticationState.Authenticated -> {
                    // textProfileWelcome.text = getString(R.string.profile_text_welcome, viewModel.username)
