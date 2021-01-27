@@ -1,6 +1,7 @@
 package br.com.luanadev.navigationcomponentapplication.extensions
 
 import androidx.navigation.NavController
+import androidx.navigation.NavDirections
 import androidx.navigation.NavOptions
 import br.com.luanadev.navigationcomponentapplication.R
 
@@ -11,6 +12,10 @@ private val navOptions = NavOptions.Builder()
     .setPopExitAnim(R.anim.slide_out_right)
     .build()
 
-fun NavController.navigateWithAnimations(destinationId: Int){
+fun NavController.navigateWithAnimations(destinationId: Int) {
     this.navigate(destinationId, null, navOptions)
+}
+
+fun NavController.navigateWithAnimations(directions: NavDirections) {
+    this.navigate(directions, navOptions)
 }

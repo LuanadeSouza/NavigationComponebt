@@ -11,7 +11,6 @@ import br.com.luanadev.navigationcomponentapplication.extensions.navigateWithAni
 import kotlinx.android.synthetic.main.fragment_start.*
 
 class StartFragment : Fragment() {
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
