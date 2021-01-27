@@ -5,6 +5,11 @@
     android:layout_height="match_parent"
     tools:context=".ui.profile.ProfileFragment">
 
-
+    <TextView
+        android:id="@+id/textProfileUsername"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="@string/profile_text_welcome"
+        android:layout_gravity="center"/>
 
 </FrameLayout>
