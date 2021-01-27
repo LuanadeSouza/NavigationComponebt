@@ -1,6 +1,5 @@
 package br.com.luanadev.navigationcomponentapplication.ui.login
 
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import br.com.luanadev.navigationcomponentapplication.R
@@ -13,31 +12,17 @@ class LoginViewModel : ViewModel() {
         class InvalidAuthentication(val fields: List<Pair<String, Int>>) : AuthenticationState()
     }
 
-    var username: String = ""
-    var token: String = ""
+    val authenticationStateEvent = MutableLiveData<AuthenticationState>()
 
-    private val _authenticationStateEvent = MutableLiveData<AuthenticationState>()
-    val authenticationStateEvent: LiveData<AuthenticationState>
-        get() = _authenticationStateEvent
 
     init {
-        refuseAuthentication()
+        authenticationStateEvent.value = AuthenticationState.Unauthenticated
     }
 
-    fun refuseAuthentication() {
-        _authenticationStateEvent.value = AuthenticationState.Unauthenticated
-    }
 
-    fun authenticateToken(token: String, username: String) {
-        this.token = token
-        this.username = username
-        _authenticationStateEvent.value = AuthenticationState.Authenticated
-    }
-
-    fun authenticate(username: String, password: String) {
+    fun authentication(username: String, password: String) {
         if (isValidForm(username, password)) {
-            this.username = username
-            _authenticationStateEvent.value = AuthenticationState.Authenticated
+            authenticationStateEvent.value = AuthenticationState.Authenticated
         }
     }
 
@@ -46,22 +31,20 @@ class LoginViewModel : ViewModel() {
         if (username.isEmpty()) {
             invalidFields.add(INPUT_USERNAME)
         }
-
         if (password.isEmpty()) {
             invalidFields.add(INPUT_PASSWORD)
         }
-
         if (invalidFields.isNotEmpty()) {
-            _authenticationStateEvent.value =
+            authenticationStateEvent.value =
                 AuthenticationState.InvalidAuthentication(invalidFields)
             return false
         }
-
         return true
     }
 
     companion object {
         val INPUT_USERNAME = "INPUT_USERNAME" to R.string.login_input_layout_error_invalid_username
-        val INPUT_PASSWORD = "INPUT_PASSWORD" to R.string.login_input_layout_error_invalid_password
+        val INPUT_PASSWORD = "INPUT_PAASSWORD" to R.string.login_input_layout_error_invalid_username
     }
+
 }
