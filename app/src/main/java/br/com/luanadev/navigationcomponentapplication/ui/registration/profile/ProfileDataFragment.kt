@@ -12,77 +12,89 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import br.com.luanadev.navigationcomponentapplication.R
 import br.com.luanadev.navigationcomponentapplication.extensions.dismissError
 import br.com.luanadev.navigationcomponentapplication.extensions.navigateWithAnimations
+import br.com.luanadev.navigationcomponentapplication.ui.login.LoginViewModel
 import br.com.luanadev.navigationcomponentapplication.ui.registration.RegistrationViewModel
+import br.com.luanadev.navigationcomponentapplication.ui.registration.choosecredentials.ChooseCredentialsFragmentArgs
 import com.google.android.material.textfield.TextInputLayout
+import kotlinx.android.synthetic.main.fragment_choose_credentials.*
 import kotlinx.android.synthetic.main.fragment_profile_data.*
 
-class ProfileDataFragment : Fragment() {
+class ChooseCredentialsFragment : Fragment() {
 
+    private val loginViewModel: LoginViewModel by activityViewModels()
     private val registrationViewModel: RegistrationViewModel by activityViewModels()
-    private val navController: NavController by lazy { findNavController() }
+
+    private val args: ChooseCredentialsFragmentArgs by navArgs()
+
+    private val navController: NavController by lazy {
+        findNavController()
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_profile_data, container, false)
+        return inflater.inflate(R.layout.fragment_choose_credentials, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setHasOptionsMenu(true)
 
-        val validationFields = initValidationFields()
-        listenToRegistrationStateEvent(validationFields)
+        textChooseCredentialsName.text = getString(R.string.choose_credentials_text_name, args.name)
+
+        val invalidFields = initValidationFields()
+        listenToRegistrationStateEvent(invalidFields)
         registerViewListeners()
-        registerDeviceBackStackCallback()
+        registerDeviceBackStack()
     }
 
     private fun initValidationFields() = mapOf(
-        RegistrationViewModel.INPUT_NAME.first to inputLayoutProfileDataName,
-        RegistrationViewModel.INPUT_BIO.first to inputLayoutProfileDataBio
+        RegistrationViewModel.INPUT_USERNAME.first to inputLayoutChooseCredentialsUsername,
+        RegistrationViewModel.INPUT_PASSWORD.first to inputLayoutChooseCredentialsPassword
     )
 
     private fun listenToRegistrationStateEvent(validationFields: Map<String, TextInputLayout>) {
-        registrationViewModel.registrationStateEvent.observe(
-            viewLifecycleOwner, Observer { registrationState ->
-                when (registrationState) {
-                    is RegistrationViewModel.RegistrationState.CollectCredentials -> {
-                        val name = inputProfileDataName.text.toString()
-                        val directions = ProfileDataFragmentDirections.actionProfileDataFragmentToChooseCredentialsFragment(name)
+        registrationViewModel.registrationStateEvent.observe(viewLifecycleOwner, Observer { registrationState ->
+            when (registrationState) {
+                is RegistrationViewModel.RegistrationState.RegistrationCompleted -> {
+                    val token = registrationViewModel.authToken
+                    val username = inputChooseCredentialsUsername.text.toString()
 
-                        findNavController().navigate(directions)
-                    }
-                    is RegistrationViewModel.RegistrationState.InvalidProfileData -> {
-                        registrationState.fields.forEach { fieldError ->
-                            validationFields[fieldError.first]?.error = getString(fieldError.second)
-                        }
+                    loginViewModel.authenticateToken(token, username)
+                    navController.popBackStack(R.id.profileFragment, false)
+                }
+                is RegistrationViewModel.RegistrationState.InvalidCredentials -> {
+                    registrationState.fields.forEach { fieldError ->
+                        validationFields[fieldError.first]?.error = getString(fieldError.second)
                     }
                 }
-            })
+            }
+        })
     }
 
     private fun registerViewListeners() {
-        buttonProfileDataNext.setOnClickListener {
-            val name = inputProfileDataName.text.toString()
-            val bio = inputProfileDataBio.text.toString()
+        buttonChooseCredentialsNext.setOnClickListener {
+            val username = inputChooseCredentialsUsername.text.toString()
+            val password = inputChooseCredentialsPassword.text.toString()
 
-            registrationViewModel.collectProfileData(name, bio)
+            registrationViewModel.createCredentials(username, password)
         }
 
-        inputProfileDataName.addTextChangedListener {
-            inputLayoutProfileDataName.dismissError()
+        inputChooseCredentialsUsername.addTextChangedListener {
+            inputLayoutChooseCredentialsUsername.dismissError()
         }
 
-        inputProfileDataBio.addTextChangedListener {
-            inputLayoutProfileDataBio.dismissError()
+        inputChooseCredentialsPassword.addTextChangedListener {
+            inputLayoutChooseCredentialsPassword.dismissError()
         }
     }
 
-    private fun registerDeviceBackStackCallback() {
+    private fun registerDeviceBackStack() {
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
             cancelRegistration()
         }
@@ -90,7 +102,7 @@ class ProfileDataFragment : Fragment() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         cancelRegistration()
-        return true
+        return super.onOptionsItemSelected(item)
     }
 
     private fun cancelRegistration() {
@@ -98,3 +110,4 @@ class ProfileDataFragment : Fragment() {
         navController.popBackStack(R.id.loginFragment, false)
     }
 }
+

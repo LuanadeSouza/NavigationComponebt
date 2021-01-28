@@ -3,24 +3,21 @@ package br.com.luanadev.navigationcomponentapplication.ui.registration
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import br.com.luanadev.navigationcomponentapplication.R
+import br.com.luanadev.navigationcomponentapplication.data.repository.UserRepository
 
-class RegistrationViewModel: ViewModel() {
+class RegistrationViewModel(private val userRepository: UserRepository
+) : ViewModel() {
 
-    sealed class RegistrationState {
-        object CollectProfileData :  RegistrationState()
-        object CollectCredentials : RegistrationState()
-        object RegistrationCompleted : RegistrationState()
-        class InvalidProfileData(val fields: List<Pair<String, Int>>) : RegistrationState()
-        class InvalidCredentials(val fields: List<Pair<String, Int>>) : RegistrationState()
-    }
 
-    private val _registrationStateEvent = MutableLiveData<RegistrationState>(RegistrationState.CollectProfileData)
+    private val _registrationStateEvent =
+        MutableLiveData<RegistrationState>(RegistrationState.CollectProfileData)
     val registrationStateEvent: LiveData<RegistrationState>
-    get() = _registrationStateEvent
+        get() = _registrationStateEvent
 
     var authToken = ""
-    private set
+        private set
 
     fun collectProfileData(name: String, bio: String) {
         if (isValidProfileData(name, bio)) {
@@ -74,16 +71,35 @@ class RegistrationViewModel: ViewModel() {
         return true
     }
 
-    fun userCancelledRegistration() : Boolean {
+    fun userCancelledRegistration(): Boolean {
         authToken = ""
         _registrationStateEvent.value = RegistrationState.CollectProfileData
         return true
     }
 
+    sealed class RegistrationState {
+        object CollectProfileData : RegistrationState()
+        object CollectCredentials : RegistrationState()
+        object RegistrationCompleted : RegistrationState()
+        class InvalidProfileData(val fields: List<Pair<String, Int>>) : RegistrationState()
+        class InvalidCredentials(val fields: List<Pair<String, Int>>) : RegistrationState()
+    }
+
+    class RegistrationViewModelFactory(private val userRepository: UserRepository) :
+        ViewModelProvider.Factory{
+
+        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+            return RegistrationViewModel(userRepository) as T
+        }
+
+    }
+
     companion object {
         val INPUT_NAME = "INPUT_NAME" to R.string.profile_data_input_layout_error_invalid_name
         val INPUT_BIO = "INPUT_BIO" to R.string.profile_data_input_layout_error_invalid_bio
-        val INPUT_USERNAME = "INPUT_USERNAME" to R.string.choose_credentials_input_layout_error_invalid_username
-        val INPUT_PASSWORD = "INPUT_PASSWORD" to R.string.choose_credentials_input_layout_error_invalid_password
+        val INPUT_USERNAME =
+            "INPUT_USERNAME" to R.string.choose_credentials_input_layout_error_invalid_username
+        val INPUT_PASSWORD =
+            "INPUT_PASSWORD" to R.string.choose_credentials_input_layout_error_invalid_password
     }
 }

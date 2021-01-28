@@ -10,15 +10,21 @@ import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
+import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import br.com.luanadev.navigationcomponentapplication.R
 import br.com.luanadev.navigationcomponentapplication.extensions.dismissError
+import br.com.luanadev.navigationcomponentapplication.extensions.navigateWithAnimations
 import com.google.android.material.textfield.TextInputLayout
 import kotlinx.android.synthetic.main.fragment_login.*
 
-class               LoginFragment : Fragment() {
+class LoginFragment : Fragment() {
 
     private val viewModel: LoginViewModel by activityViewModels()
+
+    private val navController: NavController by lazy {
+        findNavController()
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -30,34 +36,55 @@ class               LoginFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setHasOptionsMenu(true)
-        viewModel.authenticationStateEvent.observe(
-            viewLifecycleOwner, Observer { authenticationState ->
-                when (authenticationState) {
-                    is LoginViewModel.AuthenticationState.Authenticated -> {
-                        findNavController().popBackStack()
-                    }
-                    is LoginViewModel.AuthenticationState.InvalidAuthentication -> {
-                        val validationFields: Map<String, TextInputLayout> = initValidationFields()
-                        authenticationState.fields.forEach { fieldError ->
-                            validationFields[fieldError.first]?.error = getString(fieldError.second)
-                        }
+
+        val validationFields = initValidationFields()
+        listenToAuthenticationStateEvent(validationFields)
+        registerViewListeners()
+        registerDeviceBackStackCallback()
+    }
+
+    private fun initValidationFields() = mapOf(
+        LoginViewModel.INPUT_USERNAME.first to inputLayoutLoginUsername,
+        LoginViewModel.INPUT_PASSWORD.first to inputLayoutLoginPassword
+    )
+
+    private fun listenToAuthenticationStateEvent(validationFields: Map<String, TextInputLayout>) {
+        viewModel.authenticationStateEvent.observe(viewLifecycleOwner, Observer { authenticationState ->
+            when (authenticationState) {
+                is LoginViewModel.AuthenticationState.Authenticated -> {
+                    navController.popBackStack()
+                }
+                is LoginViewModel.AuthenticationState.InvalidAuthentication -> {
+                    authenticationState.fields.forEach { fieldError ->
+                        validationFields[fieldError.first]?.error = getString(fieldError.second)
                     }
                 }
-            })
+            }
+        })
+    }
+
+    private fun registerViewListeners() {
         buttonLoginSignIn.setOnClickListener {
             val username = inputLoginUsername.text.toString()
             val password = inputLoginPassword.text.toString()
-            viewModel.authentication(username, password)
+
+            viewModel.authenticate(username, password)
         }
 
-        inputLoginUsername.addTextChangedListener{
+        buttonLoginSignUp.setOnClickListener {
+            navController.navigateWithAnimations(R.id.action_loginFragment_to_navigation)
+        }
+
+        inputLoginUsername.addTextChangedListener {
             inputLayoutLoginUsername.dismissError()
         }
 
-        inputLoginPassword.addTextChangedListener{
+        inputLoginPassword.addTextChangedListener {
             inputLayoutLoginPassword.dismissError()
         }
+    }
 
+    private fun registerDeviceBackStackCallback() {
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
             cancelAuthentication()
         }
@@ -70,12 +97,6 @@ class               LoginFragment : Fragment() {
 
     private fun cancelAuthentication() {
         viewModel.refuseAuthentication()
-        findNavController().popBackStack(R.id.startFragment, false)
-
+        navController.popBackStack(R.id.startFragment, false)
     }
-
-    private fun initValidationFields() = mapOf(
-        LoginViewModel.INPUT_USERNAME.first to inputLayoutLoginUsername,
-        LoginViewModel.INPUT_PASSWORD.first to inputLayoutLoginPassword
-    )
 }

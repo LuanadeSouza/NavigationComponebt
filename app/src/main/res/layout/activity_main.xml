@@ -4,14 +4,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    tools:context=".MainActivity">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/myToolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="@color/colorPrimary"
-        android:theme="@style/Theme.AppCompat.NoActionBar"/>
+        app:title="teste"
+        android:theme="@style/Theme.AppCompat.NoActionBar" />
 
     <fragment
         android:id="@+id/navHostFragment"
@@ -19,7 +21,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:defaultNavHost="true"
-        app:navGraph="@navigation/nav_graph_app"/>
-
+        app:navGraph="@navigation/nav_graph_app" />
 
 </LinearLayout>

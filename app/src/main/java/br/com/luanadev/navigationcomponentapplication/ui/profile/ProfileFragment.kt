@@ -14,7 +14,7 @@ import kotlinx.android.synthetic.main.fragment_profile.*
 
 class ProfileFragment : Fragment() {
 
-    private val loginViewModel: LoginViewModel by activityViewModels()
+    private val viewModel: LoginViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -26,13 +26,14 @@ class ProfileFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        loginViewModel.authenticationStateEvent.observe(viewLifecycleOwner, Observer { authenticationState ->
+        val navController = findNavController()
+        viewModel.authenticationStateEvent.observe(viewLifecycleOwner, Observer { authenticationState ->
             when (authenticationState) {
-                is LoginViewModel.AuthenticationState.Authenticated -> {
-                    textProfileUsername.text = getString(R.string.profile_text_welcome, loginViewModel.username)
+                LoginViewModel.AuthenticationState.Authenticated -> {
+                    textProfileWelcome.text = getString(R.string.profile_text_welcome, viewModel.username)
                 }
-                is LoginViewModel.AuthenticationState.Unauthenticated -> {
-                    findNavController().navigate(R.id.loginFragment)
+                LoginViewModel.AuthenticationState.Unauthenticated -> {
+                    navController.navigate(R.id.loginFragment)
                 }
             }
         })
