@@ -6,15 +6,17 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.addCallback
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import br.com.luanadev.navigationcomponentapplication.R
+import br.com.luanadev.navigationcomponentapplication.extensions.dismissError
 import com.google.android.material.textfield.TextInputLayout
 import kotlinx.android.synthetic.main.fragment_login.*
 
-class LoginFragment : Fragment() {
+class               LoginFragment : Fragment() {
 
     private val viewModel: LoginViewModel by activityViewModels()
 
@@ -47,6 +49,15 @@ class LoginFragment : Fragment() {
             val password = inputLoginPassword.text.toString()
             viewModel.authentication(username, password)
         }
+
+        inputLoginUsername.addTextChangedListener{
+            inputLayoutLoginUsername.dismissError()
+        }
+
+        inputLoginPassword.addTextChangedListener{
+            inputLayoutLoginPassword.dismissError()
+        }
+
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
             cancelAuthentication()
         }
@@ -62,7 +73,6 @@ class LoginFragment : Fragment() {
         findNavController().popBackStack(R.id.startFragment, false)
 
     }
-
 
     private fun initValidationFields() = mapOf(
         LoginViewModel.INPUT_USERNAME.first to inputLayoutLoginUsername,

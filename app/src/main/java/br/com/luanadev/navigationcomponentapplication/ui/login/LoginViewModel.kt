@@ -47,6 +47,10 @@ class LoginViewModel : ViewModel() {
         return true
     }
 
+    fun authenticateToken(token: String, username: String) {
+        TODO("Not yet implemented")
+    }
+
     companion object {
         val INPUT_USERNAME = "INPUT_USERNAME" to R.string.login_input_layout_error_invalid_username
         val INPUT_PASSWORD = "INPUT_PAASSWORD" to R.string.login_input_layout_error_invalid_username
