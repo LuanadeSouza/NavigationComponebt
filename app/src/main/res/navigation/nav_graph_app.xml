@@ -38,7 +38,7 @@
         app:startDestination="@id/profileDataFragment">
         <fragment
             android:id="@+id/profileDataFragment"
-            android:name="br.com.luanadev.navigationcomponentapplication.ui.registration.profile.ProfileDataFragment"
+            android:name="br.com.luanadev.navigationcomponentapplication.ui.registration.profile.ChooseCredentialsFragment"
             android:label="@string/profile_data_action_bar_title"
             tools:layout="@layout/fragment_profile_data">
             <action
